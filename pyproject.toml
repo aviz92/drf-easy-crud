@@ -52,5 +52,5 @@ Issues = "https://github.com/aviz92/drf-easy-crud/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
-#include = ["drf_easy_crud*"]
+# include = ["drf_easy_crud*"]
 namespaces = false
