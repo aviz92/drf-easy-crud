@@ -1,0 +1,17 @@
+---
+description: Environment, package management, and project structure rules
+globs: "**/*"
+alwaysApply: true
+---
+
+# Environment & Tools
+
+## 1. Python & Package Management
+* **Version**: Target Python >= 3.12 for all projects.
+* **Tooling**: Use `uv` as the exclusive manager; never use bare `python` or `pip`.
+* **Execution**: Prefix all Python commands with `uv run`.
+
+## 2. Configuration & Workspace
+* **Secrets**: Use a `.env` file for variables; NEVER hardcode sensitive data.
+* **Discovery**: Always use the `tree` command to analyze layout before architectural changes.
+* **Safety**: Analyze file structure before any proposal to maintain integrity.

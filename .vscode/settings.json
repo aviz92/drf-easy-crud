@@ -1,0 +1,70 @@
+{
+    "editor.codeLens": false,
+    "python.analysis.autoSearchPaths": true,
+    "python.sortImports.args": [
+        "--profile",
+        "black"
+    ],
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.indexing": true,
+    "redhat.telemetry.enabled": false,
+    "window.commandCenter": true,
+    "diffEditor.hideUnchangedRegions.enabled": false,
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "none"
+    },
+    "python.analysis.extraPaths": [
+        "."
+    ],
+    "python.envFile": "./.env",
+    "python.terminal.activateEnvironment": true,
+    "python.defaultInterpreterPath": "./.venv/bin/python",
+    "files.exclude": {
+        ".vscode": false,
+        ".cursor": false,
+        ".venv": false,
+        "**/.idea": true,
+        "**/.git": true,
+        "**/.github": false,
+        "**/.pytest_cache": true,
+        "**/__pycache__": true
+    },
+    "extensions.autoUpdate": "onlyEnabledExtensions",
+    "git.autofetch": true,
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestPath": "./.venv/bin/pytest",
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
+    "python.testing.promptToConfigure": false,
+    "python.testing.codeLenses": true,
+    "python.testing.autoTestDiscoverOnSaveTimeout": 1500,
+    "python.testing.autoTestDiscoverOnSave": true,
+    "files.associations": {
+        "test_*.py": "python"
+    },
+    "explorer.excludeGitIgnore": false,
+    "workbench.colorTheme": "Default Dark+",
+    "workbench.editor.enablePreview": false,
+    "workbench.editor.tabSizing": "shrink",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file",
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "always",
+        "source.fixAll": "always"
+    },
+    "files.autoSave": "onFocusChange",
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "debug.toolBarLocation": "docked",
+    "terminal.integrated.tabs.enabled": true,
+    "terminal.integrated.tabs.hideCondition": "never",
+    "terminal.integrated.tabs.location": "right",
+    "markdown.preview.scrollEditorWithPreview": true,
+    "markdown.preview.scrollPreviewWithEditor": true
+}

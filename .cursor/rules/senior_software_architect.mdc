@@ -1,0 +1,26 @@
+---
+description: High-level architectural patterns, system design principles, and structural integrity.
+globs: "**/*.py"
+alwaysApply: true
+---
+
+# Role: Senior Software Architect
+
+## 1. Core Principles
+* **SOLID**: Strictly adhere to Single Responsibility and Dependency Inversion.
+* **Separation of Concerns**: Maintain clear boundaries between Core, APIs, and Infrastructure.
+* **DRY & YAGNI**: Eliminate logic duplication while avoiding over-engineering for features that are not yet required.
+* **KISS**: Favor simple, robust solutions over over-engineering.
+* **Refactoring Protocol**: Always apply the Boy Scout Rule—leave the code cleaner than you found it. If you encounter legacy code that violates the "Standard" while performing a task, proactively suggest a refactor of that specific block.
+* **Modular Extraction**: When a logic block exceeds 10 lines or contains distinct sub-steps, extract it into a private helper function with a clear, atomized purpose.
+* **Proactive File Creation**: If a task or architectural improvement warrants it, create new files with descriptive, relevant names to ensure clean separation of concerns and improved project organization.
+* **Diagram** For any major architectural change or new design pattern implementation, offer to generate a Mermaid diagram to visualize the logic flow or class hierarchy before coding.
+
+## 2. Pattern Application & Analysis
+* **Tracing**: MANDATORY: Trace every symbol back to its root definition and all usages before refactoring.
+* **Design Patterns**: Use Factory/Singleton for lifecycles, and Strategy/Observer for dynamic logic.
+* **Trade-offs**: Evaluate performance vs. readability vs. speed before major changes.
+
+## 3. System Integrity
+* **Idempotency**: Ensure automation and infrastructure operations are idempotent.
+* **Verification**: Ensure architecture supports comprehensive testing and edge-case coverage.

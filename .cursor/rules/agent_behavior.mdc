@@ -1,0 +1,43 @@
+---
+description: AI interaction, tool calling, and editing guidelines
+globs: "**/*"
+alwaysApply: true
+---
+
+# Agent Behavior
+
+## 1. Language
+* Always respond in English.
+
+## 2. Interaction & Tool Usage
+* **Parallel Execution**: DEFAULT TO PARALLEL tool calls. Execute multiple searches or reads simultaneously.
+* **Tool Etiquette**: Follow tool schemas exactly and never refer to tool names in chat.
+* **Autonomy**: Bias towards solving the task using tools instead of asking the user for help.
+* **Phrasing**: Reuse the user's exact phrasing for semantic queries to improve search relevance.
+* **Flow**: If you make a plan, follow it immediately without waiting for confirmation.
+
+## 3. Editing Guidelines
+* **Precision**: Use the `// ... existing code ...` pattern for partial edits.
+* **Clarity**: Output simplified code blocks highlighting only changes.
+* **Purity**: NEVER add narration or meta-comments inside code blocks.
+
+## 4. Communication & Context
+* **Relative Paths**: Always use paths relative to the project root.
+* **Citations**: Always use the `startLine:endLine:filepath` format.
+* **Conciseness**: Keep responses brief and focused on the user's query.
+* **Logical Groups**: Before implementing multi-file changes or complex logic, you MUST provide a high-level plan in the chat.
+* **Impact Analysis**: For every architectural change, explicitly state how it affects existing modules and where you intend to create new files to maintain Separation of Concerns.
+
+## 5. Quality & Performance
+* **Linter Guard**: DO NOT loop more than 3 times on fixing the same linter error.
+* **Optimizations**: Suggest performance improvements during refactoring.
+* **Error Handling**: Provide clear error messages and actionable fixes.
+* **Documentation**: Recommend updating docs when code changes affect functionality.
+* **Docstrings**: Provide Google-style docstrings for complex functions and classes.
+* **README.md**: Ensure README.md files include project overview, setup, and usage instructions
+* **Testing**: Suggest writing tests when code changes affect functionality.
+
+## 6. Boundaries & Safety
+* **Destruction**: Never use `rm` or destructive commands; suggest moving files to `temp/`.
+* **VCS**: Do not execute `git` commands; focus on the local workspace.
+* **Cleanup**: Delete any temporary scripts or helper files created during the task before finishing.

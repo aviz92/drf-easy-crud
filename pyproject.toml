@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "development-template-repository"
+version = "0.0.1"
+description = "A template repository for Python development projects"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Avi Zaguri" },]
+keywords = ["development", "template", "python"]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Framework :: Pytest",
+    "Programming Language :: Python :: 3.11",
+]
+
+dependencies = [
+    "beautifulsoup4>=4.14.3",
+    "custom-python-logger==2.0.11",
+    "pre-commit>=4.5.0",
+    "pydantic>=2.12.4",
+    "pyrest-model-client==0.0.4",
+    "pytest>=9.0.1",
+    "pytest-collect-requirements==0.0.3",
+    "pytest-depends-on==1.0.0",
+    "pytest-dynamic-parameterize==1.0.3",
+    "pytest-plugins==2.0.0",
+    "python-base-toolkit==0.0.17",
+    "python-custom-exceptions==0.0.2",
+    "python-databases==0.1.7",
+    "python-dotenv>=1.2.1",
+    "python-github-plus==0.0.5",
+    "python-gitlab-plus==1.0.5",
+    "python-jira-plus==2.0.4",
+    "python-notion-plus==0.0.8",
+    "python-simple-email-sender==1.0.7",
+    "python-test-aviz==1.0.10",
+    "python-vault==0.0.4",
+    "requests>=2.32.5",
+    "setuptools>=80.9.0",
+    "tenacity>=9.1.2",
+    "wheel>=0.45.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/aviz92/dev-template-repository"
+Repository = "https://github.com/aviz92/dev-template-repository"
+Issues = "https://github.com/aviz92/dev-template-repository/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+# include = ["development_template_repository*"]
+namespaces = false
+
+[project.scripts]  # must using "uv sync" or "uv pip install -e ." first
+run_pytest_marker = "scripts.ci.run_pytest_marker:main"
+clean_pycache = "scripts.django.clean__pycache__:main"
+clean_migrations = "scripts.django.clean_migrations:main"

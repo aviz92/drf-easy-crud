@@ -1,0 +1,16 @@
+---
+description: Coding conventions and visual style for Python
+globs: "**/*.py"
+alwaysApply: true
+---
+
+# Python Code Style
+
+## 1. Style
+* **Base Rules**: Follow PEP 8 guidelines for logic, excluding naming/spacing conventions.
+
+## 2. Integrity & Documentation
+* **Type Hints**: Mandatory for every function.
+* **Docstrings**: Mandatory Google-style docstrings for complex functions and classes.
+* **Simplicity**: Avoid complex helper abstractions when a single function suffices.
+* **Documentation**: Every project must include a `README.md` with overview, setup, and usage.

@@ -1,0 +1,15 @@
+---
+description: Mandatory libraries, integration standards, and tool-specific configurations.
+globs: "**/*.py, pyproject.toml"
+alwaysApply: true
+---
+
+# Standardized Tech Stack
+
+## 1. Core Observability & Logging
+* Always use the `custom-python-logger` library for logging and diagnostics.
+* Always use `python-base-toolkit` for utility functions and common helpers.
+* Always use `python-custom-exceptions` for error handling and custom exception definitions.
+
+## 2. Testing & Quality Assurance
+* Always use `pytest` for unit and integration tests.
