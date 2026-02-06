@@ -1,15 +1,3 @@
-"""Enterprise-grade CRUD utility class for Django REST Framework.
-
-Provides comprehensive CRUD operations with:
-- Pagination support
-- Generic wildcard filtering (no FilterSet needed)
-- Ordering and sorting
-- Queryset customization hooks
-- Performance optimizations (select_related/prefetch_related)
-- Bulk operations
-- Comprehensive error handling
-"""
-
 from collections.abc import Callable
 from typing import Any
 
@@ -43,17 +31,11 @@ class CRUDUtils:
     def _get_instance_by_pk(
         model_class: type[models.Model],
         pk: Any,
-        select_related: list[str] | None = None,
-        prefetch_related: list[str] | None = None,
     ) -> models.Model | None:
         """Get a model instance by primary key with optional performance optimizations."""
 
         try:
             queryset = model_class.objects.all()
-            if select_related:
-                queryset = queryset.select_related(*select_related)
-            if prefetch_related:
-                queryset = queryset.prefetch_related(*prefetch_related)
             return queryset.get(pk=pk)
         except model_class.DoesNotExist:
             logger.warning(f"{model_class.__name__} with pk={pk} not found")
@@ -158,18 +140,11 @@ class CRUDUtils:
         serializer_class: type[ModelSerializer],
         pk: Any,
         partial: bool,
-        select_related: list[str] | None = None,
-        prefetch_related: list[str] | None = None,
         **kwargs: Any,
     ) -> Response:
         """Internal method to update an instance."""
 
-        instance = CRUDUtils._get_instance_by_pk(
-            model_class=model_class,
-            pk=pk,
-            select_related=select_related,
-            prefetch_related=prefetch_related,
-        )
+        instance = CRUDUtils._get_instance_by_pk(model_class=model_class,pk=pk)
         if not instance:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -193,8 +168,6 @@ class CRUDUtils:
         request: Request,
         model_class: type[models.Model],
         serializer_class: type[ModelSerializer],
-        select_related: list[str] | None = None,
-        prefetch_related: list[str] | None = None,
         **kwargs: Any,
     ) -> Response:
         """Update an existing instance with full replacement (PUT semantics)."""
@@ -208,8 +181,6 @@ class CRUDUtils:
             serializer_class=serializer_class,
             pk=pk,
             partial=False,
-            select_related=select_related,
-            prefetch_related=prefetch_related,
             **kwargs,
         )
 
@@ -218,8 +189,6 @@ class CRUDUtils:
         request: Request,
         model_class: type[models.Model],
         serializer_class: type[ModelSerializer],
-        select_related: list[str] | None = None,
-        prefetch_related: list[str] | None = None,
         **kwargs: Any,
     ) -> Response:
         """Partially update an existing instance (PATCH semantics)."""
@@ -233,8 +202,6 @@ class CRUDUtils:
             serializer_class=serializer_class,
             pk=pk,
             partial=True,
-            select_related=select_related,
-            prefetch_related=prefetch_related,
             **kwargs,
         )
 

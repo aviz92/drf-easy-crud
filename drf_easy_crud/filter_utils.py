@@ -1,15 +1,3 @@
-"""Enterprise-grade CRUD utility class for Django REST Framework.
-
-Provides comprehensive CRUD operations with:
-- Pagination support
-- Generic wildcard filtering (no FilterSet needed)
-- Ordering and sorting
-- Queryset customization hooks
-- Performance optimizations (select_related/prefetch_related)
-- Bulk operations
-- Comprehensive error handling
-"""
-
 import re
 from typing import Any
 
