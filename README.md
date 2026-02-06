@@ -36,7 +36,7 @@ from myapp.serializers import MyModelSerializer
 class MyModelViewSet(viewsets.ViewSet):
     """Example ViewSet using CRUDUtils."""
 
-    def list(self, request: Request) -> Response:
+    def get(self, request: Request) -> Response:
         """List all instances with filtering and pagination."""
         return CRUDUtils.get(
             request=request,
@@ -44,23 +44,14 @@ class MyModelViewSet(viewsets.ViewSet):
             serializer_class=MyModelSerializer,
         )
 
-    def retrieve(self, request: Request, pk: int) -> Response:
-        """Retrieve a single instance."""
-        return CRUDUtils.get(
-            request=request,
-            model_class=MyModel,
-            serializer_class=MyModelSerializer,
-            pk=pk,
-        )
-
-    def create(self, request: Request) -> Response:
+    def post(self, request: Request) -> Response:
         """Create a new instance."""
         return CRUDUtils.post(
             request=request,
             serializer_class=MyModelSerializer,
         )
 
-    def update(self, request: Request, pk: int) -> Response:
+    def put(self, request: Request, pk: int) -> Response:
         """Full update of an instance."""
         return CRUDUtils.put(
             request=request,
@@ -69,7 +60,7 @@ class MyModelViewSet(viewsets.ViewSet):
             pk=pk,
         )
 
-    def partial_update(self, request: Request, pk: int) -> Response:
+    def patch(self, request: Request, pk: int) -> Response:
         """Partial update of an instance."""
         return CRUDUtils.patch(
             request=request,
@@ -78,7 +69,7 @@ class MyModelViewSet(viewsets.ViewSet):
             pk=pk,
         )
 
-    def destroy(self, request: Request, pk: int) -> Response:
+    def delete(self, request: Request, pk: int) -> Response:
         """Delete an instance."""
         return CRUDUtils.delete(
             model_class=MyModel,
@@ -170,7 +161,7 @@ GET /api/orders/?customer__company__name=acme*
 ```
 
 ### Filtering Examples
-```python
+```bash
 # Search by name starting with "test"
 GET /api/mymodel/?name=test*
 
