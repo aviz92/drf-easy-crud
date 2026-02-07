@@ -1,3 +1,12 @@
+![PyPI version](https://img.shields.io/pypi/v/drf-easy-crud)
+![Python](https://img.shields.io/badge/python->=3.12-blue)
+![Development Status](https://img.shields.io/badge/status-stable-green)
+![Maintenance](https://img.shields.io/maintenance/yes/2026)
+![PyPI](https://img.shields.io/pypi/dm/drf-easy-crud)
+![License](https://img.shields.io/pypi/l/drf-easy-crud)
+
+---
+
 # DRF Easy CRUD
 Enterprise-grade utility library for simplifying CRUD operations in Django REST Framework. Provides powerful filtering, pagination, and standardized CRUD methods to accelerate API development.
 
