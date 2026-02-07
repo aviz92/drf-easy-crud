@@ -70,7 +70,7 @@ class FilterUtils:
         value_str = param_value
         for operator, suffix in OPERATOR_MAPPING.items():
             if param_value.startswith(operator):
-                lookup_suffix = suffix
+                lookup_suffix = suffix[0]
                 value_str = param_value[len(operator) :].strip()
                 break
 
