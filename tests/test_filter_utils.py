@@ -1,9 +1,11 @@
+# pylint: disable=W0212
 import pytest
 from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request as DRFRequest
 from rest_framework.test import APIRequestFactory
 
 from drf_easy_crud.filter_utils import FilterUtils
+from tests.conftest import ArticleFactory, TagFactory
 from tests.test_app.models import Article, Tag
 
 rf = APIRequestFactory()
@@ -43,7 +45,7 @@ class TestHasMiddleWildcard:
 
 class TestApplyTextWildcardFilter:
     @pytest.mark.django_db
-    def test_exact_match(self, article_factory) -> None:
+    def test_exact_match(self, article_factory: ArticleFactory) -> None:
         article_factory(title="Django REST")
         article_factory(title="Django ORM")
         qs = Article.objects.all()
@@ -52,7 +54,7 @@ class TestApplyTextWildcardFilter:
         assert result.first().title == "Django REST"
 
     @pytest.mark.django_db
-    def test_contains_wildcard(self, article_factory) -> None:
+    def test_contains_wildcard(self, article_factory: ArticleFactory) -> None:
         article_factory(title="Django REST")
         article_factory(title="Flask API")
         qs = Article.objects.all()
@@ -61,7 +63,7 @@ class TestApplyTextWildcardFilter:
         assert result.first().title == "Django REST"
 
     @pytest.mark.django_db
-    def test_starts_with_wildcard(self, article_factory) -> None:
+    def test_starts_with_wildcard(self, article_factory: ArticleFactory) -> None:
         article_factory(title="Django REST")
         article_factory(title="Django ORM")
         article_factory(title="Flask API")
@@ -70,7 +72,7 @@ class TestApplyTextWildcardFilter:
         assert result.count() == 2
 
     @pytest.mark.django_db
-    def test_ends_with_wildcard(self, article_factory) -> None:
+    def test_ends_with_wildcard(self, article_factory: ArticleFactory) -> None:
         article_factory(title="Django REST")
         article_factory(title="Flask REST")
         article_factory(title="Flask API")
@@ -79,7 +81,7 @@ class TestApplyTextWildcardFilter:
         assert result.count() == 2
 
     @pytest.mark.django_db
-    def test_middle_wildcard_uses_regex(self, article_factory) -> None:
+    def test_middle_wildcard_uses_regex(self, article_factory: ArticleFactory) -> None:
         article_factory(title="hello world")
         article_factory(title="hxllo world")
         article_factory(title="no match")
@@ -88,7 +90,7 @@ class TestApplyTextWildcardFilter:
         assert result.count() == 2
 
     @pytest.mark.django_db
-    def test_exact_match_case_insensitive(self, article_factory) -> None:
+    def test_exact_match_case_insensitive(self, article_factory: ArticleFactory) -> None:
         article_factory(title="Django REST")
         qs = Article.objects.all()
         result = FilterUtils._apply_text_wildcard_filter(qs, "title", "django rest")
@@ -97,7 +99,7 @@ class TestApplyTextWildcardFilter:
 
 class TestApplyNumberFilter:
     @pytest.fixture(autouse=True)
-    def setup(self, article_factory) -> None:
+    def setup(self, article_factory: ArticleFactory) -> None:
         article_factory(views=5)
         article_factory(views=15)
         article_factory(views=25)
@@ -174,7 +176,7 @@ class TestGetLookupTargetField:
 
 class TestApplyWildcardFiltering:
     @pytest.mark.django_db
-    def test_filters_by_title(self, article_factory) -> None:
+    def test_filters_by_title(self, article_factory: ArticleFactory) -> None:
         article_factory(title="Python Guide")
         article_factory(title="Django Guide")
         request = make_get("/", {"title": "*Guide*"})
@@ -182,33 +184,32 @@ class TestApplyWildcardFiltering:
         assert result.count() == 2
 
     @pytest.mark.django_db
-    def test_reserved_params_are_skipped(self, article_factory) -> None:
+    def test_reserved_params_are_skipped(self, article_factory: ArticleFactory) -> None:
         article_factory(title="Article One")
         request = make_get("/", {"page": "1", "page_size": "10"})
         result = FilterUtils.apply_wildcard_filtering(queryset=Article.objects.all(), request=request)
         assert result.count() == 1
 
     @pytest.mark.django_db
-    def test_invalid_field_raises_validation_error(self, article_factory) -> None:
+    def test_invalid_field_raises_validation_error(self, article_factory: ArticleFactory) -> None:
         article_factory()
         request = make_get("/", {"nonexistent": "value"})
         with pytest.raises(ValidationError):
             FilterUtils.apply_wildcard_filtering(queryset=Article.objects.all(), request=request)
 
     @pytest.mark.django_db
-    def test_filterable_fields_allowlist_blocks_unlisted_params(self, article_factory) -> None:
+    def test_filterable_fields_allowlist_blocks_unlisted_params(self, article_factory: ArticleFactory) -> None:
         article_factory(title="Only One", views=100)
         request = make_get("/", {"views": "100"})
-        # views is not in allowlist — should be silently skipped
         result = FilterUtils.apply_wildcard_filtering(
             queryset=Article.objects.all(),
             request=request,
             filterable_fields=["title"],
         )
-        assert result.count() == 1  # no filtering applied, all returned
+        assert result.count() == 1  # views filter skipped, all returned
 
     @pytest.mark.django_db
-    def test_filterable_fields_allowlist_permits_listed_params(self, article_factory) -> None:
+    def test_filterable_fields_allowlist_permits_listed_params(self, article_factory: ArticleFactory) -> None:
         article_factory(title="Match", views=100)
         article_factory(title="No Match", views=5)
         request = make_get("/", {"title": "Match"})
@@ -221,7 +222,7 @@ class TestApplyWildcardFiltering:
         assert result.first().title == "Match"
 
     @pytest.mark.django_db
-    def test_fk_filter(self, article_factory, tag_factory) -> None:
+    def test_fk_filter(self, article_factory: ArticleFactory, tag_factory: TagFactory) -> None:
         tag = tag_factory(name="python")
         article_factory(title="Python Post", tag=tag)
         article_factory(title="Other Post")

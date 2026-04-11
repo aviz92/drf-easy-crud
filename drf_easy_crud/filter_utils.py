@@ -106,7 +106,7 @@ class FilterUtils:
         if isinstance(field, NUMBER_FIELDS):
             return FilterUtils._apply_number_filter(queryset, param_name, param_value, field)
 
-        if isinstance(field, (models.CharField, models.TextField)):
+        if isinstance(field, models.CharField | models.TextField):
             return FilterUtils._apply_text_wildcard_filter(queryset, param_name, param_value)
 
         return queryset.filter(**{param_name: param_value})  # For other field types (bool, date, etc.), use exact match

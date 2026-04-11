@@ -1,8 +1,13 @@
+from collections.abc import Callable
+from typing import Any
+
 import pytest
 from rest_framework.serializers import ModelSerializer
-from rest_framework.test import APIRequestFactory
 
 from tests.test_app.models import Article, Tag
+
+ArticleFactory = Callable[..., Article]
+TagFactory = Callable[..., Tag]
 
 
 class TagSerializer(ModelSerializer):
@@ -18,14 +23,15 @@ class ArticleSerializer(ModelSerializer):
 
 
 @pytest.fixture
-def rf() -> APIRequestFactory:
-    return APIRequestFactory()
-
-
-@pytest.fixture
-def article_factory(db):
-    def _factory(**kwargs) -> Article:
-        defaults = {"title": "Test Article", "content": "", "views": 0, "rating": 0.0, "is_published": False}
+def article_factory(db: None) -> ArticleFactory:
+    def _factory(**kwargs: Any) -> Article:
+        defaults: dict[str, Any] = {
+            "title": "Test Article",
+            "content": "",
+            "views": 0,
+            "rating": 0.0,
+            "is_published": False,
+        }
         defaults.update(kwargs)
         return Article.objects.create(**defaults)
 
@@ -33,9 +39,9 @@ def article_factory(db):
 
 
 @pytest.fixture
-def tag_factory(db):
-    def _factory(**kwargs) -> Tag:
-        defaults = {"name": "test-tag"}
+def tag_factory(db: None) -> TagFactory:
+    def _factory(**kwargs: Any) -> Tag:
+        defaults: dict[str, Any] = {"name": "test-tag"}
         defaults.update(kwargs)
         return Tag.objects.create(**defaults)
 
