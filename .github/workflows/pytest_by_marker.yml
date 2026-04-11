@@ -50,21 +50,16 @@ jobs:
               target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
             });
 
-      - name: Set up Python
-        id: setup-python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
 
       - name: Install dependencies
-        id: install-dependencies
         run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
+          uv sync --group dev
 
       - name: Run pytest with marker
         id: run-pytest
-        run: pytest -m "${{ inputs.marker }}" --maxfail=1 --disable-warnings -v -s
+        run: uv run pytest -m "${{ inputs.marker }}" --maxfail=1 --disable-warnings -v -s
 
       - name: Set final status
         id: set-final-status
