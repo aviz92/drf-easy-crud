@@ -116,7 +116,9 @@ class CRUDUtils:
         queryset = CRUDUtils._build_queryset(model_class=model_class, request=request, queryset_hook=queryset_hook)
         if not (instance := CRUDUtils._get_instance_by_pk(queryset=queryset, pk=pk)):
             return Response(status=status.HTTP_404_NOT_FOUND)
-        if not CRUDUtils._check_object_permissions(request=request, instance=instance, permission_classes=permission_classes):
+        if not CRUDUtils._check_object_permissions(
+            request=request, instance=instance, permission_classes=permission_classes
+        ):
             logger.warning("Permission denied: model=%s pk=%s user=%s", model_class.__name__, pk, request.user)
             raise PermissionDenied()
         serializer = serializer_class(instance, context={"request": request})
@@ -214,7 +216,9 @@ class CRUDUtils:
         instance = CRUDUtils._get_instance_by_pk(queryset=queryset, pk=pk)
         if not instance:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        if not CRUDUtils._check_object_permissions(request=request, instance=instance, permission_classes=permission_classes):
+        if not CRUDUtils._check_object_permissions(
+            request=request, instance=instance, permission_classes=permission_classes
+        ):
             logger.warning("Permission denied: model=%s pk=%s user=%s", model_class.__name__, pk, request.user)
             raise PermissionDenied()
 

@@ -6,7 +6,6 @@ from rest_framework.test import APIRequestFactory
 from drf_easy_crud.filter_utils import FilterUtils
 from tests.test_app.models import Article, Tag
 
-
 rf = APIRequestFactory()
 
 
