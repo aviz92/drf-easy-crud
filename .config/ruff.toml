@@ -24,6 +24,10 @@ ignore = [
     "B008",     # do-not-perform-function-calls-in-argument-defaults
     "B006",     # do-not-use-mutable-defaults
     "PLR2004",  # Magic value used in comparison
+
+    # Test Only:
+    "B011",     # Do not `assert False`
+
 ]
 
 [lint.per-file-ignores]
