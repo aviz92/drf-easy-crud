@@ -107,9 +107,8 @@ class CRUDUtils:
         return queryset_hook(request)
 
     @staticmethod
-    def get_detail(  # pylint: disable=R0913
+    def get_detail(
         request: Request,
-        model_class: type[models.Model],
         serializer_class: type[ModelSerializer],
         pk: Any,
         queryset_hook: Callable[[Request], models.QuerySet],
@@ -123,15 +122,14 @@ class CRUDUtils:
         if not CRUDUtils._check_object_permissions(
             request=request, instance=instance, permission_classes=permission_classes
         ):
-            logger.warning("Permission denied: model=%s pk=%s user=%s", model_class.__name__, pk, request.user)
+            logger.warning("Permission denied: model=%s pk=%s user=%s", queryset.model.__name__, pk, request.user)
             raise PermissionDenied()
         serializer = serializer_class(instance, context={"request": request})
         return Response(serializer.data)
 
     @staticmethod
-    def get_list(  # pylint: disable=R0913,W0613
+    def get_list(
         request: Request,
-        model_class: type[models.Model],
         serializer_class: type[ModelSerializer],
         queryset_hook: Callable[[Request], models.QuerySet],
         ordering_field: str | None = "pk",
@@ -152,7 +150,6 @@ class CRUDUtils:
     @staticmethod
     def get(  # pylint: disable=R0913
         request: Request,
-        model_class: type[models.Model],
         serializer_class: type[ModelSerializer],
         queryset_hook: Callable[[Request], models.QuerySet],
         ordering_field: str | None = "pk",
@@ -165,7 +162,6 @@ class CRUDUtils:
         if (pk := kwargs.get("pk")) is not None:
             return CRUDUtils.get_detail(
                 request=request,
-                model_class=model_class,
                 serializer_class=serializer_class,
                 pk=pk,
                 queryset_hook=queryset_hook,
@@ -173,7 +169,6 @@ class CRUDUtils:
             )
         return CRUDUtils.get_list(
             request=request,
-            model_class=model_class,
             serializer_class=serializer_class,
             queryset_hook=queryset_hook,
             ordering_field=ordering_field,
@@ -206,7 +201,6 @@ class CRUDUtils:
     @staticmethod
     def _update_instance(  # pylint: disable=R0913
         request: Request,
-        model_class: type[models.Model],
         serializer_class: type[ModelSerializer],
         pk: Any,
         partial: bool,
@@ -222,26 +216,25 @@ class CRUDUtils:
         if not CRUDUtils._check_object_permissions(
             request=request, instance=instance, permission_classes=permission_classes
         ):
-            logger.warning("Permission denied: model=%s pk=%s user=%s", model_class.__name__, pk, request.user)
+            logger.warning("Permission denied: model=%s pk=%s user=%s", queryset.model.__name__, pk, request.user)
             raise PermissionDenied()
 
         serializer = serializer_class(instance, data=request.data, context={"request": request}, partial=partial)
         if not serializer.is_valid():
-            logger.warning("Validation failed for %s pk=%s: %s", model_class.__name__, pk, serializer.errors)
+            logger.warning("Validation failed for %s pk=%s: %s", queryset.model.__name__, pk, serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         try:
             serializer.save(**kwargs)
             update_type = "Partially updated" if partial else "Updated"
-            logger.info("%s %s with pk=%s", update_type, model_class.__name__, pk)
+            logger.info("%s %s with pk=%s", update_type, queryset.model.__name__, pk)
             return Response(serializer.data)
         except (IntegrityError, DjangoValidationError) as e:
-            logger.error("Database error updating %s pk=%s: %s", model_class.__name__, pk, str(e))
+            logger.error("Database error updating %s pk=%s: %s", queryset.model.__name__, pk, str(e))
             raise DRFValidationError({"detail": str(e)}) from e
 
     @staticmethod
     def put(
         request: Request,
-        model_class: type[models.Model],
         serializer_class: type[ModelSerializer],
         queryset_hook: Callable[[Request], models.QuerySet],
         permission_classes: list[type[BasePermission]] | None = None,
@@ -250,11 +243,10 @@ class CRUDUtils:
         """Update an existing instance with full replacement (PUT semantics)."""
 
         if (pk := kwargs.pop("pk", None)) is None:
-            logger.warning("PUT request missing pk for %s", model_class.__name__)
+            logger.warning("PUT request missing pk for %s", queryset_hook(request).model.__name__)
             return Response(status=status.HTTP_404_NOT_FOUND)
         return CRUDUtils._update_instance(
             request=request,
-            model_class=model_class,
             serializer_class=serializer_class,
             pk=pk,
             partial=False,
@@ -266,7 +258,6 @@ class CRUDUtils:
     @staticmethod
     def patch(
         request: Request,
-        model_class: type[models.Model],
         serializer_class: type[ModelSerializer],
         queryset_hook: Callable[[Request], models.QuerySet],
         permission_classes: list[type[BasePermission]] | None = None,
@@ -275,11 +266,10 @@ class CRUDUtils:
         """Partially update an existing instance (PATCH semantics)."""
 
         if (pk := kwargs.pop("pk", None)) is None:
-            logger.warning("PATCH request missing pk for %s", model_class.__name__)
+            logger.warning("PATCH request missing pk for %s", queryset_hook(request).model.__name__)
             return Response(status=status.HTTP_404_NOT_FOUND)
         return CRUDUtils._update_instance(
             request=request,
-            model_class=model_class,
             serializer_class=serializer_class,
             pk=pk,
             partial=True,
@@ -290,7 +280,6 @@ class CRUDUtils:
 
     @staticmethod
     def delete(
-        model_class: type[models.Model],
         request: Request,
         queryset_hook: Callable[[Request], models.QuerySet],
         permission_classes: list[type[BasePermission]] | None = None,
@@ -298,11 +287,11 @@ class CRUDUtils:
     ) -> Response:
         """Delete an existing instance."""
 
-        if (pk := kwargs.get("pk")) is None:
-            logger.warning("DELETE request missing pk for %s", model_class.__name__)
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
         queryset = CRUDUtils._build_queryset(request=request, queryset_hook=queryset_hook)
+
+        if (pk := kwargs.get("pk")) is None:
+            logger.warning("DELETE request missing pk for %s", queryset.model.__name__)
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
         if not (instance := CRUDUtils._get_instance_by_pk(queryset=queryset, pk=pk)):
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -310,13 +299,13 @@ class CRUDUtils:
         if not CRUDUtils._check_object_permissions(
             request=request, instance=instance, permission_classes=permission_classes
         ):
-            logger.warning("Permission denied: model=%s pk=%s user=%s", model_class.__name__, pk, request.user)
+            logger.warning("Permission denied: model=%s pk=%s user=%s", queryset.model.__name__, pk, request.user)
             raise PermissionDenied()
 
         try:
             instance.delete()
-            logger.info("Deleted %s with pk=%s", model_class.__name__, pk)
+            logger.info("Deleted %s with pk=%s", queryset.model.__name__, pk)
             return Response(status=status.HTTP_204_NO_CONTENT)
         except (IntegrityError, ProtectedError) as e:
-            logger.error("Error deleting %s pk=%s: %s", model_class.__name__, pk, str(e))
+            logger.error("Error deleting %s pk=%s: %s", queryset.model.__name__, pk, str(e))
             raise DRFValidationError({"detail": str(e)}) from e

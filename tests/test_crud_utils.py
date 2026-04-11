@@ -89,7 +89,6 @@ class TestGetDetail:
         request = get(f"/articles/{article.pk}/")
         response = CRUDUtils.get_detail(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             pk=article.pk,
             queryset_hook=all_articles,
@@ -102,7 +101,6 @@ class TestGetDetail:
         request = get("/articles/99999/")
         response = CRUDUtils.get_detail(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             pk=99999,
             queryset_hook=all_articles,
@@ -115,7 +113,6 @@ class TestGetDetail:
         request = get(f"/articles/{article.pk}/")
         response = CRUDUtils.get_detail(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             pk=article.pk,
             queryset_hook=lambda req: Article.objects.filter(is_published=True),
@@ -131,7 +128,6 @@ class TestGetList:
         request = get("/articles/")
         response = CRUDUtils.get_list(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             queryset_hook=all_articles,
         )
@@ -142,7 +138,6 @@ class TestGetList:
         request = get("/articles/")
         response = CRUDUtils.get_list(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             queryset_hook=all_articles,
         )
@@ -155,7 +150,6 @@ class TestGetList:
         request = get("/articles/")
         response = CRUDUtils.get_list(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             queryset_hook=lambda req: Article.objects.filter(is_published=True),
         )
@@ -170,7 +164,6 @@ class TestGet:
         request = get(f"/articles/{article.pk}/")
         response = CRUDUtils.get(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             queryset_hook=all_articles,
             pk=article.pk,
@@ -184,7 +177,6 @@ class TestGet:
         request = get("/articles/")
         response = CRUDUtils.get(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             queryset_hook=all_articles,
         )
@@ -196,7 +188,6 @@ class TestGet:
         request = get("/articles/0/")
         response = CRUDUtils.get(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             queryset_hook=all_articles,
             pk=0,
@@ -226,7 +217,6 @@ class TestPut:
         request = put(f"/articles/{article.pk}/", {"title": "New Title", "views": 5})
         response = CRUDUtils.put(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             queryset_hook=all_articles,
             pk=article.pk,
@@ -241,7 +231,6 @@ class TestPut:
         request = put("/articles/", {"title": "Title"})
         response = CRUDUtils.put(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             queryset_hook=all_articles,
         )
@@ -252,7 +241,6 @@ class TestPut:
         request = put("/articles/99999/", {"title": "Title"})
         response = CRUDUtils.put(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             queryset_hook=all_articles,
             pk=99999,
@@ -265,7 +253,6 @@ class TestPut:
         request = put(f"/articles/{article.pk}/", {"title": "Updated"})
         response = CRUDUtils.put(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             queryset_hook=lambda req: Article.objects.filter(is_published=True),
             pk=article.pk,
@@ -280,7 +267,6 @@ class TestPatch:
         request = patch(f"/articles/{article.pk}/", {"title": "Patched"})
         response = CRUDUtils.patch(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             queryset_hook=all_articles,
             pk=article.pk,
@@ -293,7 +279,6 @@ class TestPatch:
         request = patch("/articles/", {"title": "Title"})
         response = CRUDUtils.patch(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             queryset_hook=all_articles,
         )
@@ -305,7 +290,6 @@ class TestDelete:
     def test_deletes_instance_and_returns_204(self, article_factory: ArticleFactory) -> None:
         article = article_factory()
         response = CRUDUtils.delete(
-            model_class=Article,
             request=delete(f"/articles/{article.pk}/"),
             queryset_hook=all_articles,
             pk=article.pk,
@@ -316,7 +300,6 @@ class TestDelete:
     @pytest.mark.django_db
     def test_returns_404_for_nonexistent_pk(self) -> None:
         response = CRUDUtils.delete(
-            model_class=Article,
             request=delete("/articles/99999/"),
             queryset_hook=all_articles,
             pk=99999,
@@ -326,7 +309,6 @@ class TestDelete:
     @pytest.mark.django_db
     def test_returns_404_when_pk_missing(self) -> None:
         response = CRUDUtils.delete(
-            model_class=Article,
             request=delete("/articles/"),
             queryset_hook=all_articles,
         )
@@ -337,7 +319,6 @@ class TestDelete:
         article = article_factory(is_published=False)
         request = delete(f"/articles/{article.pk}/")
         response = CRUDUtils.delete(
-            model_class=Article,
             request=request,
             queryset_hook=lambda req: Article.objects.filter(is_published=True),
             pk=article.pk,
@@ -356,7 +337,6 @@ class TestObjectPermissions:
         with pytest.raises(PermissionDenied):
             CRUDUtils.get_detail(
                 request=request,
-                model_class=Article,
                 serializer_class=ArticleSerializer,
                 pk=article.pk,
                 queryset_hook=all_articles,
@@ -369,7 +349,6 @@ class TestObjectPermissions:
         request = get(f"/articles/{article.pk}/")
         response = CRUDUtils.get_detail(
             request=request,
-            model_class=Article,
             serializer_class=ArticleSerializer,
             pk=article.pk,
             queryset_hook=all_articles,
@@ -384,7 +363,6 @@ class TestObjectPermissions:
         with pytest.raises(PermissionDenied):
             CRUDUtils.put(
                 request=request,
-                model_class=Article,
                 serializer_class=ArticleSerializer,
                 queryset_hook=all_articles,
                 permission_classes=[DenyAll],
@@ -398,7 +376,6 @@ class TestObjectPermissions:
         with pytest.raises(PermissionDenied):
             CRUDUtils.patch(
                 request=request,
-                model_class=Article,
                 serializer_class=ArticleSerializer,
                 queryset_hook=all_articles,
                 permission_classes=[DenyAll],
@@ -411,7 +388,6 @@ class TestObjectPermissions:
         request = delete(f"/articles/{article.pk}/")
         with pytest.raises(PermissionDenied):
             CRUDUtils.delete(
-                model_class=Article,
                 request=request,
                 queryset_hook=all_articles,
                 permission_classes=[DenyAll],
@@ -426,7 +402,6 @@ class TestObjectPermissions:
         with pytest.raises(PermissionDenied):
             CRUDUtils.get_detail(
                 request=request,
-                model_class=Article,
                 serializer_class=ArticleSerializer,
                 pk=article.pk,
                 queryset_hook=all_articles,
