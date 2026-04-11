@@ -54,7 +54,7 @@ def delete(path: str) -> DRFRequest:
 
 class TestGetInstanceByPk:
     @pytest.mark.django_db
-    def \1(self, article_factory: ArticleFactory) -> None:
+    def test_returns_instance_when_found(self, article_factory: ArticleFactory) -> None:
         article = article_factory(title="Found")
         result = CRUDUtils._get_instance_by_pk(queryset=Article.objects.all(), pk=article.pk)
         assert result is not None
@@ -66,7 +66,7 @@ class TestGetInstanceByPk:
         assert result is None
 
     @pytest.mark.django_db
-    def \1(self, article_factory: ArticleFactory) -> None:
+    def test_respects_queryset_scope(self, article_factory: ArticleFactory) -> None:
         article = article_factory(title="Published", is_published=True)
         article_factory(title="Draft", is_published=False)
         scoped_qs = Article.objects.filter(is_published=True)
@@ -77,7 +77,7 @@ class TestGetInstanceByPk:
 
 class TestGetDetail:
     @pytest.mark.django_db
-    def test_returns_200_when_found(self, article_factory) -> None:
+    def test_returns_200_when_found(self, article_factory: ArticleFactory) -> None:
         article = article_factory(title="Detail Test")
         response = CRUDUtils.get_detail(
             request=get(f"/articles/{article.pk}/"),
@@ -99,7 +99,7 @@ class TestGetDetail:
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.django_db
-    def \1(self, article_factory: ArticleFactory) -> None:
+    def test_respects_queryset_scope(self, article_factory: ArticleFactory) -> None:
         article = article_factory(title="Draft", is_published=False)
         response = CRUDUtils.get_detail(
             request=get(f"/articles/{article.pk}/"),
@@ -112,7 +112,7 @@ class TestGetDetail:
 
 class TestGetList:
     @pytest.mark.django_db
-    def test_returns_200_with_results(self, article_factory) -> None:
+    def test_returns_200_with_results(self, article_factory: ArticleFactory) -> None:
         article_factory(title="Article A")
         article_factory(title="Article B")
         response = CRUDUtils.get_list(
@@ -132,7 +132,7 @@ class TestGetList:
         assert response.status_code == status.HTTP_200_OK
 
     @pytest.mark.django_db
-    def \1(self, article_factory: ArticleFactory) -> None:
+    def test_queryset_restricts_results(self, article_factory: ArticleFactory) -> None:
         article_factory(is_published=True)
         article_factory(is_published=False)
         response = CRUDUtils.get_list(
@@ -146,7 +146,7 @@ class TestGetList:
 
 class TestGet:
     @pytest.mark.django_db
-    def \1(self, article_factory: ArticleFactory) -> None:
+    def test_routes_to_detail_when_pk_given(self, article_factory: ArticleFactory) -> None:
         article = article_factory(title="Route Test")
         response = CRUDUtils.get(
             request=get(f"/articles/{article.pk}/"),
@@ -158,7 +158,7 @@ class TestGet:
         assert response.data["title"] == "Route Test"
 
     @pytest.mark.django_db
-    def \1(self, article_factory: ArticleFactory) -> None:
+    def test_routes_to_list_without_pk(self, article_factory: ArticleFactory) -> None:
         article_factory()
         response = CRUDUtils.get(
             request=get("/articles/"),
@@ -200,7 +200,7 @@ class TestPost:
 
 class TestPut:
     @pytest.mark.django_db
-    def test_full_update_returns_200(self, article_factory) -> None:
+    def test_full_update_returns_200(self, article_factory: ArticleFactory) -> None:
         article = article_factory(title="Old Title")
         response = CRUDUtils.put(
             request=put(f"/articles/{article.pk}/", {"title": "New Title", "views": 5}),
@@ -233,7 +233,7 @@ class TestPut:
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.django_db
-    def \1(self, article_factory: ArticleFactory) -> None:
+    def test_respects_queryset_scope(self, article_factory: ArticleFactory) -> None:
         article = article_factory(title="Draft", is_published=False)
         response = CRUDUtils.put(
             request=put(f"/articles/{article.pk}/", {"title": "Updated"}),
@@ -246,7 +246,7 @@ class TestPut:
 
 class TestPatch:
     @pytest.mark.django_db
-    def test_partial_update_returns_200(self, article_factory) -> None:
+    def test_partial_update_returns_200(self, article_factory: ArticleFactory) -> None:
         article = article_factory(title="Original")
         response = CRUDUtils.patch(
             request=patch(f"/articles/{article.pk}/", {"title": "Patched"}),
@@ -269,7 +269,7 @@ class TestPatch:
 
 class TestDelete:
     @pytest.mark.django_db
-    def test_deletes_instance_and_returns_204(self, article_factory) -> None:
+    def test_deletes_instance_and_returns_204(self, article_factory: ArticleFactory) -> None:
         article = article_factory()
         response = CRUDUtils.delete(
             request=delete(f"/articles/{article.pk}/"),
@@ -297,7 +297,7 @@ class TestDelete:
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.django_db
-    def \1(self, article_factory: ArticleFactory) -> None:
+    def test_respects_queryset_scope(self, article_factory: ArticleFactory) -> None:
         article = article_factory(is_published=False)
         response = CRUDUtils.delete(
             request=delete(f"/articles/{article.pk}/"),
@@ -312,7 +312,7 @@ class TestModelClassShorthand:
     """Verify that passing a Model class is equivalent to Model.objects.all()."""
 
     @pytest.mark.django_db
-    def \1(self, article_factory: ArticleFactory) -> None:
+    def test_get_detail_accepts_model_class(self, article_factory: ArticleFactory) -> None:
         article = article_factory(title="Shorthand")
         response = CRUDUtils.get_detail(
             request=get(f"/articles/{article.pk}/"),
@@ -324,7 +324,7 @@ class TestModelClassShorthand:
         assert response.data["title"] == "Shorthand"
 
     @pytest.mark.django_db
-    def \1(self, article_factory: ArticleFactory) -> None:
+    def test_get_list_accepts_model_class(self, article_factory: ArticleFactory) -> None:
         article_factory()
         response = CRUDUtils.get_list(
             request=get("/articles/"),
@@ -334,7 +334,7 @@ class TestModelClassShorthand:
         assert response.status_code == status.HTTP_200_OK
 
     @pytest.mark.django_db
-    def \1(self, article_factory: ArticleFactory) -> None:
+    def test_delete_accepts_model_class(self, article_factory: ArticleFactory) -> None:
         article = article_factory()
         response = CRUDUtils.delete(
             request=delete(f"/articles/{article.pk}/"),
@@ -348,7 +348,7 @@ class TestObjectPermissions:
     """Verify that permission_classes are enforced on detail, update, and delete."""
 
     @pytest.mark.django_db
-    def test_get_detail_raises_403_when_denied(self, article_factory) -> None:
+    def test_get_detail_raises_403_when_denied(self, article_factory: ArticleFactory) -> None:
         article = article_factory()
         with pytest.raises(PermissionDenied):
             CRUDUtils.get_detail(
@@ -360,7 +360,7 @@ class TestObjectPermissions:
             )
 
     @pytest.mark.django_db
-    def \1(self, article_factory: ArticleFactory) -> None:
+    def test_get_detail_succeeds_when_allowed(self, article_factory: ArticleFactory) -> None:
         article = article_factory()
         response = CRUDUtils.get_detail(
             request=get(f"/articles/{article.pk}/"),
@@ -372,7 +372,7 @@ class TestObjectPermissions:
         assert response.status_code == status.HTTP_200_OK
 
     @pytest.mark.django_db
-    def test_put_raises_403_when_denied(self, article_factory) -> None:
+    def test_put_raises_403_when_denied(self, article_factory: ArticleFactory) -> None:
         article = article_factory()
         with pytest.raises(PermissionDenied):
             CRUDUtils.put(
@@ -384,7 +384,7 @@ class TestObjectPermissions:
             )
 
     @pytest.mark.django_db
-    def test_patch_raises_403_when_denied(self, article_factory) -> None:
+    def test_patch_raises_403_when_denied(self, article_factory: ArticleFactory) -> None:
         article = article_factory()
         with pytest.raises(PermissionDenied):
             CRUDUtils.patch(
@@ -396,7 +396,7 @@ class TestObjectPermissions:
             )
 
     @pytest.mark.django_db
-    def test_delete_raises_403_when_denied(self, article_factory) -> None:
+    def test_delete_raises_403_when_denied(self, article_factory: ArticleFactory) -> None:
         article = article_factory()
         with pytest.raises(PermissionDenied):
             CRUDUtils.delete(
@@ -408,7 +408,7 @@ class TestObjectPermissions:
         assert Article.objects.filter(pk=article.pk).exists()  # not deleted
 
     @pytest.mark.django_db
-    def \1(self, article_factory: ArticleFactory) -> None:
+    def test_multiple_classes_all_must_pass(self, article_factory: ArticleFactory) -> None:
         article = article_factory()
         with pytest.raises(PermissionDenied):
             CRUDUtils.get_detail(
