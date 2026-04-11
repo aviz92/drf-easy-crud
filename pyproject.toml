@@ -45,6 +45,9 @@ dependencies = [
     "django-models>=1.0",
 ]
 
+[dependency-groups]
+dev = []
+
 [project.urls]
 Homepage = "https://github.com/aviz92/drf-easy-crud"
 Repository = "https://github.com/aviz92/drf-easy-crud"

@@ -1,5 +1,4 @@
 import re
-from typing import Any
 
 from custom_python_logger import get_logger
 from django.core.exceptions import FieldDoesNotExist
@@ -7,7 +6,7 @@ from django.db import models
 from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 
-from drf_easy_crud.const import INTEGER_FIELDS, OPERATOR_MAPPING, RELATED_LOOKUP, RESERVED_PARAMS
+from drf_easy_crud.const import INTEGER_FIELDS, NUMBER_FIELDS, OPERATOR_MAPPING, RELATED_LOOKUP, RESERVED_PARAMS
 
 logger = get_logger(__name__)
 
@@ -70,7 +69,7 @@ class FilterUtils:
         value_str = param_value
         for operator, suffix in OPERATOR_MAPPING.items():
             if param_value.startswith(operator):
-                lookup_suffix = suffix[0]
+                lookup_suffix = suffix
                 value_str = param_value[len(operator) :].strip()
                 break
 
@@ -87,13 +86,12 @@ class FilterUtils:
         param_name: str,
         param_value: str,
         field: models.Field,
-        django_models: Any,
     ) -> models.QuerySet:
         """Apply wildcard filtering to a specific field.
 
         Supports:
         - Text fields: wildcard patterns (*test*, test*, *test, t*t)
-        - Number fields: comparison operators (>=10, <=100, >5, <20) and ranges (10-20)
+        - Number fields: comparison operators (>=10, <=100, >5, <20)
         - Other fields: exact match
 
         Args:
@@ -101,26 +99,14 @@ class FilterUtils:
             param_name: The parameter name (field or lookup path).
             param_value: The parameter value (may contain wildcards or operators).
             field: The Django field object.
-            django_models: Django models module.
 
         Returns:
             Filtered queryset.
         """
-        is_number_field = isinstance(
-            field,
-            django_models.IntegerField
-            | django_models.BigIntegerField
-            | django_models.SmallIntegerField
-            | django_models.PositiveIntegerField
-            | django_models.PositiveSmallIntegerField
-            | django_models.FloatField
-            | django_models.DecimalField,
-        )
-
-        if is_number_field:
+        if isinstance(field, NUMBER_FIELDS):
             return FilterUtils._apply_number_filter(queryset, param_name, param_value, field)
 
-        if isinstance(field, django_models.CharField | django_models.TextField):  # is_text_field
+        if isinstance(field, models.CharField | models.TextField):
             return FilterUtils._apply_text_wildcard_filter(queryset, param_name, param_value)
 
         return queryset.filter(**{param_name: param_value})  # For other field types (bool, date, etc.), use exact match
@@ -154,8 +140,20 @@ class FilterUtils:
     def apply_wildcard_filtering(
         queryset: models.QuerySet,
         request: Request,
+        filterable_fields: list[str] | None = None,
     ) -> models.QuerySet:
-        """Apply generic wildcard filtering directly to queryset."""
+        """Apply generic wildcard filtering directly to queryset.
+
+        Args:
+            queryset: The queryset to filter.
+            request: The DRF request containing query params.
+            filterable_fields: Explicit allowlist of field names that may be filtered.
+                When provided, query params whose base field is not in this list are
+                silently skipped. When None, all model fields are filterable.
+
+        Returns:
+            Filtered queryset.
+        """
 
         query_params = request.query_params.copy()
         model = queryset.model
@@ -164,6 +162,11 @@ class FilterUtils:
         filtered_queryset = queryset
         for param_name, param_value in query_params.items():
             if param_name in RESERVED_PARAMS or not param_value:  # Skip reserved params and empty values
+                continue
+
+            # Enforce allowlist: skip params whose base field is not explicitly permitted
+            base_field = param_name.split(RELATED_LOOKUP)[0]
+            if filterable_fields is not None and base_field not in filterable_fields:
                 continue
 
             if RELATED_LOOKUP in param_name:  # Check if this is a ForeignKey lookup (contains "__")
@@ -186,6 +189,5 @@ class FilterUtils:
                 param_name=param_name,
                 param_value=param_value,
                 field=target_field,
-                django_models=models,
             )
         return filtered_queryset

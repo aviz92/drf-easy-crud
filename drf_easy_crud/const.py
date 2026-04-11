@@ -4,11 +4,11 @@ RESERVED_PARAMS = {"page", "page_size", "ordering", "format"}
 
 RELATED_LOOKUP = "__"
 
-OPERATOR_MAPPING = {  # pylint: disable=R6101
-    ">=": ("__gte", 2),
-    "<=": ("__lte", 2),
-    ">": ("__gt", 1),
-    "<": ("__lt", 1),
+OPERATOR_MAPPING = {
+    ">=": "__gte",
+    "<=": "__lte",
+    ">": "__gt",
+    "<": "__lt",
 }
 
 DEFAULT_PAGE_SIZE = 20
@@ -21,4 +21,10 @@ INTEGER_FIELDS = (
     models.SmallIntegerField,
     models.PositiveIntegerField,
     models.PositiveSmallIntegerField,
+)
+
+NUMBER_FIELDS = (
+    *INTEGER_FIELDS,
+    models.FloatField,
+    models.DecimalField,
 )
