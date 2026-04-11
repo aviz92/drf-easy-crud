@@ -193,7 +193,8 @@ class CRUDUtils:
             logger.info("Created %s with id=%s", model_name, instance_id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except (IntegrityError, DjangoValidationError) as e:
-            logger.error("Database error creating %s: %s", serializer_class.Meta.model.__name__, str(e))  # type: ignore[attr-defined]
+            model_name = serializer_class.Meta.model.__name__  # type: ignore[attr-defined]
+            logger.error("Database error creating %s: %s", model_name, str(e))
             raise DRFValidationError({"detail": str(e)}) from e
 
     @staticmethod
