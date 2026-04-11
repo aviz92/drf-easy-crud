@@ -33,7 +33,6 @@ uv add drf-easy-crud
 ### Basic Usage
 ```python
 from rest_framework import viewsets
-from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -45,12 +44,13 @@ from myapp.serializers import MyModelSerializer
 class MyModelViewSet(viewsets.ViewSet):
     """Example ViewSet using CRUDUtils."""
 
-    def get(self, request: Request) -> Response:
-        """List all instances with filtering and pagination."""
+    def get(self, request: Request, pk: int | None = None) -> Response:
+        """List all instances or retrieve a single one by pk."""
         return CRUDUtils.get(
             request=request,
-            model_class=MyModel,
+            queryset=MyModel,
             serializer_class=MyModelSerializer,
+            pk=pk,
         )
 
     def post(self, request: Request) -> Response:
@@ -64,7 +64,7 @@ class MyModelViewSet(viewsets.ViewSet):
         """Full update of an instance."""
         return CRUDUtils.put(
             request=request,
-            model_class=MyModel,
+            queryset=MyModel,
             serializer_class=MyModelSerializer,
             pk=pk,
         )
@@ -73,7 +73,7 @@ class MyModelViewSet(viewsets.ViewSet):
         """Partial update of an instance."""
         return CRUDUtils.patch(
             request=request,
-            model_class=MyModel,
+            queryset=MyModel,
             serializer_class=MyModelSerializer,
             pk=pk,
         )
@@ -81,22 +81,22 @@ class MyModelViewSet(viewsets.ViewSet):
     def delete(self, request: Request, pk: int) -> Response:
         """Delete an instance."""
         return CRUDUtils.delete(
-            model_class=MyModel,
+            request=request,
+            queryset=MyModel,
             pk=pk,
         )
 ```
 
 ## Advanced Features
-### Custom Queryset Hooks
-Filter the base queryset before applying request filters:
+### Pre-scoped Querysets
+Pass a pre-filtered queryset instead of a model class for full control:
 ```python
 def list(self, request: Request) -> Response:
-    """List only active instances."""
+    """List only active instances belonging to the current user."""
     return CRUDUtils.get(
         request=request,
-        model_class=MyModel,
+        queryset=MyModel.objects.filter(is_active=True, owner=request.user),
         serializer_class=MyModelSerializer,
-        queryset_hook=lambda: MyModel.objects.filter(is_active=True),
     )
 ```
 
@@ -115,7 +115,7 @@ class CustomPagination(PageNumberPagination):
 def list(self, request: Request) -> Response:
     return CRUDUtils.get(
         request=request,
-        model_class=MyModel,
+        queryset=MyModel,
         serializer_class=MyModelSerializer,
         pagination_class=CustomPagination,
     )
@@ -127,7 +127,7 @@ Specify default ordering for list endpoints:
 def list(self, request: Request) -> Response:
     return CRUDUtils.get(
         request=request,
-        model_class=MyModel,
+        queryset=MyModel,
         serializer_class=MyModelSerializer,
         ordering_field="-created_at",  # Newest first
     )
