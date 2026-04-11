@@ -1,4 +1,3 @@
-from collections.abc import Callable
 from typing import Any
 
 from custom_python_logger import get_logger
@@ -18,6 +17,19 @@ from drf_easy_crud.filter_utils import FilterUtils
 
 logger = get_logger(__name__)
 
+QuerySetOrModel = models.QuerySet | type[models.Model]
+
+
+def _resolve_queryset(queryset: QuerySetOrModel) -> models.QuerySet:
+    """Accept either a QuerySet or a Model class and return a QuerySet.
+
+    Passing a model class is shorthand for ``Model.objects.all()``.
+    """
+
+    if isinstance(queryset, type) and issubclass(queryset, models.Model):
+        return queryset.objects.all()
+    return queryset  # type: ignore[return-value]
+
 
 class StandardResultsSetPagination(PageNumberPagination):
     """Standard pagination class for list endpoints."""
@@ -28,7 +40,7 @@ class StandardResultsSetPagination(PageNumberPagination):
 
 
 class CRUDUtils:
-    """Enterprise-grade utility class providing comprehensive CRUD operations for Django REST Framework views."""
+    """Utility class providing CRUD operations for Django REST Framework views."""
 
     @staticmethod
     def _check_object_permissions(
@@ -92,31 +104,16 @@ class CRUDUtils:
         return queryset
 
     @staticmethod
-    def _build_queryset(
-        request: Request,
-        queryset_hook: Callable[[Request], models.QuerySet],
-    ) -> models.QuerySet:
-        """Build the scoped queryset by invoking the caller-supplied hook.
-
-        The hook receives the request so it can apply per-user, per-tenant, or any
-        other runtime scoping.  Example::
-
-            queryset_hook=lambda req: Article.objects.filter(owner=req.user)
-        """
-
-        return queryset_hook(request)
-
-    @staticmethod
     def get_detail(
         request: Request,
         serializer_class: type[ModelSerializer],
         pk: Any,
-        queryset_hook: Callable[[Request], models.QuerySet],
+        queryset: QuerySetOrModel,
         permission_classes: list[type[BasePermission]] | None = None,
     ) -> Response:
         """Retrieve a single instance by pk, respecting the queryset scope and permission classes."""
 
-        queryset = CRUDUtils._build_queryset(request=request, queryset_hook=queryset_hook)
+        queryset = _resolve_queryset(queryset)
         if not (instance := CRUDUtils._get_instance_by_pk(queryset=queryset, pk=pk)):
             return Response(status=status.HTTP_404_NOT_FOUND)
         if not CRUDUtils._check_object_permissions(
@@ -131,13 +128,13 @@ class CRUDUtils:
     def get_list(
         request: Request,
         serializer_class: type[ModelSerializer],
-        queryset_hook: Callable[[Request], models.QuerySet],
+        queryset: QuerySetOrModel,
         ordering_field: str | None = "pk",
         pagination_class: type[PageNumberPagination] | None = None,
     ) -> Response:
         """Retrieve a paginated, filtered list of instances."""
 
-        queryset = CRUDUtils._build_queryset(request=request, queryset_hook=queryset_hook)
+        queryset = _resolve_queryset(queryset)
         queryset = CRUDUtils._apply_filtering(queryset=queryset, request=request)
         queryset = queryset.order_by(ordering_field)
         return CRUDUtils.apply_pagination(
@@ -151,7 +148,7 @@ class CRUDUtils:
     def get(  # pylint: disable=R0913
         request: Request,
         serializer_class: type[ModelSerializer],
-        queryset_hook: Callable[[Request], models.QuerySet],
+        queryset: QuerySetOrModel,
         ordering_field: str | None = "pk",
         pagination_class: type[PageNumberPagination] | None = None,
         permission_classes: list[type[BasePermission]] | None = None,
@@ -159,18 +156,19 @@ class CRUDUtils:
     ) -> Response:
         """Route to get_detail when pk is present, otherwise to get_list."""
 
+        queryset = _resolve_queryset(queryset)
         if (pk := kwargs.get("pk")) is not None:
             return CRUDUtils.get_detail(
                 request=request,
                 serializer_class=serializer_class,
                 pk=pk,
-                queryset_hook=queryset_hook,
+                queryset=queryset,
                 permission_classes=permission_classes,
             )
         return CRUDUtils.get_list(
             request=request,
             serializer_class=serializer_class,
-            queryset_hook=queryset_hook,
+            queryset=queryset,
             ordering_field=ordering_field,
             pagination_class=pagination_class,
         )
@@ -185,17 +183,17 @@ class CRUDUtils:
 
         serializer = serializer_class(data=request.data, context={"request": request})
         if not serializer.is_valid():
-            model_name = serializer_class.Meta.model.__name__
+            model_name = serializer_class.Meta.model.__name__  # type: ignore[attr-defined]
             logger.warning("Validation failed for %s: %s", model_name, serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         try:
             serializer.save(**kwargs)
-            model_name = serializer_class.Meta.model.__name__
+            model_name = serializer_class.Meta.model.__name__  # type: ignore[attr-defined]
             instance_id = serializer.data.get("id")
             logger.info("Created %s with id=%s", model_name, instance_id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except (IntegrityError, DjangoValidationError) as e:
-            logger.error("Database error creating %s: %s", serializer_class.Meta.model.__name__, str(e))
+            logger.error("Database error creating %s: %s", serializer_class.Meta.model.__name__, str(e))  # type: ignore[attr-defined]
             raise DRFValidationError({"detail": str(e)}) from e
 
     @staticmethod
@@ -204,13 +202,12 @@ class CRUDUtils:
         serializer_class: type[ModelSerializer],
         pk: Any,
         partial: bool,
-        queryset_hook: Callable[[Request], models.QuerySet],
+        queryset: models.QuerySet,
         permission_classes: list[type[BasePermission]] | None = None,
         **kwargs: Any,
     ) -> Response:
         """Internal method to update an instance."""
 
-        queryset = CRUDUtils._build_queryset(request=request, queryset_hook=queryset_hook)
         if not (instance := CRUDUtils._get_instance_by_pk(queryset=queryset, pk=pk)):
             return Response(status=status.HTTP_404_NOT_FOUND)
         if not CRUDUtils._check_object_permissions(
@@ -236,21 +233,22 @@ class CRUDUtils:
     def put(
         request: Request,
         serializer_class: type[ModelSerializer],
-        queryset_hook: Callable[[Request], models.QuerySet],
+        queryset: QuerySetOrModel,
         permission_classes: list[type[BasePermission]] | None = None,
         **kwargs: Any,
     ) -> Response:
         """Update an existing instance with full replacement (PUT semantics)."""
 
+        queryset = _resolve_queryset(queryset)
         if (pk := kwargs.pop("pk", None)) is None:
-            logger.warning("PUT request missing pk for %s", queryset_hook(request).model.__name__)
+            logger.warning("PUT request missing pk for %s", queryset.model.__name__)
             return Response(status=status.HTTP_404_NOT_FOUND)
         return CRUDUtils._update_instance(
             request=request,
             serializer_class=serializer_class,
             pk=pk,
             partial=False,
-            queryset_hook=queryset_hook,
+            queryset=queryset,
             permission_classes=permission_classes,
             **kwargs,
         )
@@ -259,21 +257,22 @@ class CRUDUtils:
     def patch(
         request: Request,
         serializer_class: type[ModelSerializer],
-        queryset_hook: Callable[[Request], models.QuerySet],
+        queryset: QuerySetOrModel,
         permission_classes: list[type[BasePermission]] | None = None,
         **kwargs: Any,
     ) -> Response:
         """Partially update an existing instance (PATCH semantics)."""
 
+        queryset = _resolve_queryset(queryset)
         if (pk := kwargs.pop("pk", None)) is None:
-            logger.warning("PATCH request missing pk for %s", queryset_hook(request).model.__name__)
+            logger.warning("PATCH request missing pk for %s", queryset.model.__name__)
             return Response(status=status.HTTP_404_NOT_FOUND)
         return CRUDUtils._update_instance(
             request=request,
             serializer_class=serializer_class,
             pk=pk,
             partial=True,
-            queryset_hook=queryset_hook,
+            queryset=queryset,
             permission_classes=permission_classes,
             **kwargs,
         )
@@ -281,14 +280,13 @@ class CRUDUtils:
     @staticmethod
     def delete(
         request: Request,
-        queryset_hook: Callable[[Request], models.QuerySet],
+        queryset: QuerySetOrModel,
         permission_classes: list[type[BasePermission]] | None = None,
         **kwargs: Any,
     ) -> Response:
         """Delete an existing instance."""
 
-        queryset = CRUDUtils._build_queryset(request=request, queryset_hook=queryset_hook)
-
+        queryset = _resolve_queryset(queryset)
         if (pk := kwargs.get("pk")) is None:
             logger.warning("DELETE request missing pk for %s", queryset.model.__name__)
             return Response(status=status.HTTP_404_NOT_FOUND)
