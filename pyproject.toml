@@ -23,7 +23,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "custom-python-logger>=2.0.11",
+    "custom-python-logger>=4.0.0",
     "pytest-plugins>=2.0.1",
     "python-base-toolkit>=0.0.17",
     "python-custom-exceptions>=0.0.2",

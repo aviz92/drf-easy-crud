@@ -1,5 +1,7 @@
 from django.db import models
 
+LOGGER_NAME = "pytest_depends_on"
+
 RESERVED_PARAMS = {"page", "page_size", "ordering", "format"}
 
 RELATED_LOOKUP = "__"

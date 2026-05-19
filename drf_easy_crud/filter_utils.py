@@ -6,9 +6,10 @@ from django.db import models
 from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 
-from drf_easy_crud.const import INTEGER_FIELDS, NUMBER_FIELDS, OPERATOR_MAPPING, RELATED_LOOKUP, RESERVED_PARAMS
+from drf_easy_crud.const import INTEGER_FIELDS, NUMBER_FIELDS, OPERATOR_MAPPING, RELATED_LOOKUP, RESERVED_PARAMS, \
+    LOGGER_NAME
 
-logger = get_logger(__name__)
+logger = get_logger(LOGGER_NAME)
 
 
 class FilterUtils:

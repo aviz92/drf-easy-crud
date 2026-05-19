@@ -1,7 +1,9 @@
 from custom_python_logger import build_logger
 from python_github_plus import GitHubClient
 
-logger = build_logger(__name__)
+from drf_easy_crud.const import LOGGER_NAME
+
+logger = build_logger(LOGGER_NAME)
 
 
 def run_pytest_marker_workflow(
