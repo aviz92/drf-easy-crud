@@ -12,7 +12,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 
-from drf_easy_crud.const import DEFAULT_MAX_PAGE_SIZE, DEFAULT_PAGE_SIZE, PAGE_SIZE_QUERY_PARAM, LOGGER_NAME
+from drf_easy_crud.const import DEFAULT_MAX_PAGE_SIZE, DEFAULT_PAGE_SIZE, LOGGER_NAME, PAGE_SIZE_QUERY_PARAM
 from drf_easy_crud.filter_utils import FilterUtils
 
 logger = get_logger(LOGGER_NAME)
