@@ -1,6 +1,6 @@
 from django.db import models
 
-LOGGER_NAME = "pytest_depends_on"
+LOGGER_NAME = "drf_easy_crud"
 
 RESERVED_PARAMS = {"page", "page_size", "ordering", "format"}
 
