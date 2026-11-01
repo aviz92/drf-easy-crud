@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "drf-easy-crud"
-version = "2.1.1"
+version = "3.0.0"
 description = "Easy CRUD operations for Django REST Framework."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -23,30 +23,19 @@ classifiers = [
 ]
 
 dependencies = [
-    "custom-python-logger>=4.0.0",
-    "pytest-plugins>=2.0.1",
-    "python-base-toolkit>=0.0.17",
-    "python-custom-exceptions>=0.0.2",
-    "python-github-plus==0.0.5",
-    "beautifulsoup4>=4.14.3",
-    "pre-commit>=4.5.0",
-    "pydantic>=2.12.4",
-    "pytest>=9.0.1",
-    "python-dotenv>=1.2.1",
-    "requests>=2.32.5",
-    "setuptools>=80.9.0",
-    "tenacity>=9.1.2",
-    "wheel>=0.45.1",
+    "custom-python-logger>=4.2.0",
     "django>=5.2.11",
-    "djangorestframework>=3.16.1",
-    "django-schema-graph>=3.1.0",
-    "django-filter>=25.2",
-    "pytest-django>=4.11.1",
-    "django-models>=1.0",
+    "djangorestframework>=3.18.3",
 ]
 
 [dependency-groups]
-dev = []
+dev = [
+    "pre-commit>=4.7.0",
+    "pytest>=9.2.0",
+    "pytest-better-report>=1.0.3",
+    "pytest-django>=4.14.0",
+    "python-base-toolkit>=1.2.1",
+]
 
 [project.urls]
 Homepage = "https://github.com/aviz92/drf-easy-crud"
